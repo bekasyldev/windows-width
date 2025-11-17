@@ -39,101 +39,85 @@ function detectWindowsZoom() {
     }
 }
 
-        // Функция для обновления информации на странице
-        function updateZoomInfo() {
-            const zoomValueElement = document.getElementById('zoomValue');
-            const statusElement = document.getElementById('status');
+function updateZoomInfo() {
+    const zoomValueElement = document.getElementById('zoomValue');
+    const statusElement = document.getElementById('status');
+    
+    zoomValueElement.innerHTML = '<span class="loading"></span>';
+    
+    setTimeout(() => {
+        const zoomInfo = detectWindowsZoom();
+        
+        if (zoomInfo) {
+            zoomValueElement.textContent = `${zoomInfo.zoom}%`;
             
-            // Показываем индикатор загрузки
-            zoomValueElement.innerHTML = '<span class="loading"></span>';
+            document.getElementById('screenResolution').textContent = zoomInfo.screenResolution;
+            document.getElementById('availableArea').textContent = zoomInfo.availableArea;
             
-            // Небольшая задержка для плавности анимации
-            setTimeout(() => {
-                const zoomInfo = detectWindowsZoom();
-                
-                if (zoomInfo) {
-                    // Обновляем основной показатель масштаба
-                    zoomValueElement.textContent = `${zoomInfo.zoom}%`;
-                    
-                    // Обновляем дополнительную информацию
-                    document.getElementById('screenResolution').textContent = zoomInfo.screenResolution;
-                    document.getElementById('availableArea').textContent = zoomInfo.availableArea;
-                    
-                    // Обновляем время последнего обновления
-                    document.getElementById('lastUpdated').textContent = new Date().toLocaleString('ru-RU');
-                    
-                    // Показываем статус успеха
-                    statusElement.className = 'status success';
-                    statusElement.textContent = 'Данные успешно обновлены';
-                    statusElement.style.display = 'block';
-                    
-                    // Скрываем статус через 3 секунды
-                    setTimeout(() => {
-                        statusElement.style.display = 'none';
-                    }, 3000);
-                    
-                } else {
-                    zoomValueElement.textContent = 'Ошибка';
-                    statusElement.className = 'status error';
-                    statusElement.textContent = 'Не удалось определить масштаб';
-                    statusElement.style.display = 'block';
-                }
-            }, 300);
-        }
-
-        // Функция для автоматического обновления при изменении размера окна
-        function setupAutoUpdate() {
-            let resizeTimeout;
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleString('ru-RU');
             
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(() => {
-                    updateZoomInfo();
-                }, 500); // Обновляем через 500мс после завершения ресайза
-            });
-            
-            // Обновляем при изменении devicePixelRatio (смена масштаба)
-            const mediaQuery = window.matchMedia('(resolution: 1dppx)');
-            mediaQuery.addListener(() => {
-                setTimeout(updateZoomInfo, 100);
-            });
-        }
-
-        // Инициализация при загрузке страницы
-        document.addEventListener('DOMContentLoaded', () => {
-            // Показываем информационное сообщение
-            const statusElement = document.getElementById('status');
-            statusElement.className = 'status info';
-            statusElement.textContent = 'Определение масштаба Windows...';
+            statusElement.className = 'status success';
+            statusElement.textContent = 'Данные успешно обновлены';
             statusElement.style.display = 'block';
             
-            // Запускаем определение масштаба
             setTimeout(() => {
-                updateZoomInfo();
-                setupAutoUpdate();
-            }, 500);
-        });
-
-        // Дополнительная функция для экспорта данных (если понадобится)
-        function getZoomData() {
-            const zoomInfo = detectWindowsZoom();
-            return {
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent,
-                platform: navigator.platform,
-                ...zoomInfo
-            };
+                statusElement.style.display = 'none';
+            }, 3000);
+            
+        } else {
+            zoomValueElement.textContent = 'Ошибка';
+            statusElement.className = 'status error';
+            statusElement.textContent = 'Не удалось определить масштаб';
+            statusElement.style.display = 'block';
         }
+    }, 300);
+}
 
-        // Добавляем обработчик для сочетания клавиш (Ctrl+R для обновления)
-        document.addEventListener('keydown', (event) => {
-            if (event.ctrlKey && event.key === 'r') {
-                event.preventDefault();
-                updateZoomInfo();
-            }
-        });
+function setupAutoUpdate() {
+    let resizeTimeout;
+    
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            updateZoomInfo();
+        }, 500);
+    });
+    
+    const mediaQuery = window.matchMedia('(resolution: 1dppx)');
+    mediaQuery.addListener(() => {
+        setTimeout(updateZoomInfo, 100);
+    });
+}
 
-        // Функция для вывода в консоль (для отладки)
-        function logZoomInfo() {
-            console.log('Информация о масштабе Windows:', getZoomData());
-        }
+document.addEventListener('DOMContentLoaded', () => {
+    const statusElement = document.getElementById('status');
+    statusElement.className = 'status info';
+    statusElement.textContent = 'Определение масштаба Windows...';
+    statusElement.style.display = 'block';
+    
+    setTimeout(() => {
+        updateZoomInfo();
+        setupAutoUpdate();
+    }, 500);
+});
+
+function getZoomData() {
+    const zoomInfo = detectWindowsZoom();
+    return {
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        ...zoomInfo
+    };
+}
+
+document.addEventListener('keydown', (event) => {
+    if (event.ctrlKey && event.key === 'r') {
+        event.preventDefault();
+        updateZoomInfo();
+    }
+});
+
+function logZoomInfo() {
+    console.log('Информация о масштабе Windows:', getZoomData());
+}
