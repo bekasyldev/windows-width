@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Определение масштаба Windows</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Определение масштаба Windows</h1>
+        
+        <div class="zoom-display">
+            <div class="zoom-value" id="zoomValue">
+                <span class="loading"></span>
+            </div>
+            <div class="zoom-label">Текущий масштаб Windows</div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Разрешение экрана</h3>
+                <p id="screenResolution">-</p>
+            </div>
+            <div class="info-card">
+                <h3>Доступная область</h3>
+                <p id="availableArea">-</p>
+            </div>
+        </div>
+
+        <button class="refresh-btn" onclick="updateZoomInfo()">
+            Обновить данные
+        </button>
+
+        <div id="status" class="status" style="display: none;"></div>
+        <div class="last-updated">
+            Последнее обновление: <span id="lastUpdated">-</span>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
