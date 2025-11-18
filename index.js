@@ -6,32 +6,15 @@ function detectWindowsZoom() {
         const availWidth = screen.availWidth;
         const availHeight = screen.availHeight;
         
-        let zoomLevel = Math.round(devicePixelRatio * 100);
-        
-        const testDiv = document.createElement('div');
-        testDiv.style.width = '1in';
-        testDiv.style.height = '1in';
-        testDiv.style.position = 'absolute';
-        testDiv.style.visibility = 'hidden';
-        document.body.appendChild(testDiv);
-        
-        const dpi = testDiv.offsetWidth;
-        document.body.removeChild(testDiv);
-        
-        const standardDPI = 96;
-        const scaleFactor = dpi / standardDPI;
-        
-        if (scaleFactor !== 1) {
-            zoomLevel = Math.round(scaleFactor * 100);
-        }
+        const correctedRatio = devicePixelRatio / 1.2;
+        const zoom = Math.round(correctedRatio * 100);
         
         return {
-            zoom: zoomLevel,
-            devicePixelRatio: devicePixelRatio,
+            zoom: zoom,
+            devicePixelRatio: devicePixelRatio.toFixed(2),
             screenResolution: `${screenWidth} × ${screenHeight}`,
             availableArea: `${availWidth} × ${availHeight}`,
-            dpi: Math.round(dpi),
-            scaleFactor: scaleFactor
+            scaleFactor: correctedRatio.toFixed(2)
         };
     } catch (error) {
         console.error('Ошибка при определении масштаба:', error);
@@ -75,18 +58,37 @@ function updateZoomInfo() {
 
 function setupAutoUpdate() {
     let resizeTimeout;
+    let lastPixelRatio = window.devicePixelRatio;
     
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-            updateZoomInfo();
-        }, 500);
+            const currentPixelRatio = window.devicePixelRatio;
+            if (currentPixelRatio !== lastPixelRatio) {
+                lastPixelRatio = currentPixelRatio;
+                updateZoomInfo();
+            } else {
+                updateZoomInfo();
+            }
+        }, 300);
     });
     
-    const mediaQuery = window.matchMedia('(resolution: 1dppx)');
-    mediaQuery.addListener(() => {
-        setTimeout(updateZoomInfo, 100);
-    });
+    const checkPixelRatioChange = () => {
+        const currentPixelRatio = window.devicePixelRatio;
+        if (currentPixelRatio !== lastPixelRatio) {
+            lastPixelRatio = currentPixelRatio;
+            updateZoomInfo();
+        }
+    };
+    
+    setInterval(checkPixelRatioChange, 1000);
+    
+    const mediaQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener('change', () => {
+            setTimeout(updateZoomInfo, 100);
+        });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
