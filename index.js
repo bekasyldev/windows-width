@@ -1,20 +1,28 @@
 function detectWindowsZoom() {
     try {
-        const devicePixelRatio = window.devicePixelRatio || 1;
         const screenWidth = screen.width;
         const screenHeight = screen.height;
         const availWidth = screen.availWidth;
         const availHeight = screen.availHeight;
         
-        const correctedRatio = devicePixelRatio / 1.2;
-        const zoom = Math.round(correctedRatio * 100);
+        let systemDPI = 96;
+        
+        for (let dpi = 48; dpi <= 384; dpi++) {
+            if (window.matchMedia(`(resolution: ${dpi}dpi)`).matches) {
+                systemDPI = dpi;
+                break;
+            }
+        }
+        
+        const windowsScaleFactor = systemDPI / 96;
+        const windowsZoom = Math.round(windowsScaleFactor * 100);
         
         return {
-            zoom: zoom,
-            devicePixelRatio: devicePixelRatio.toFixed(2),
+            zoom: windowsZoom,
+            devicePixelRatio: window.devicePixelRatio.toFixed(2),
             screenResolution: `${screenWidth} × ${screenHeight}`,
             availableArea: `${availWidth} × ${availHeight}`,
-            scaleFactor: correctedRatio.toFixed(2)
+            scaleFactor: windowsScaleFactor.toFixed(2)
         };
     } catch (error) {
         console.error('Ошибка при определении масштаба:', error);
